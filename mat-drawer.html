@@ -1,0 +1,701 @@
+<!--
+@license
+Copyright (c) 2015 The ExpandJS authors. All rights reserved.
+This code may only be used under the BSD style license found at https://expandjs.github.io/LICENSE.txt
+The complete set of authors may be found at https://expandjs.github.io/AUTHORS.txt
+The complete set of contributors may be found at https://expandjs.github.io/CONTRIBUTORS.txt
+-->
+
+<!--
+An element used to display a [Material Design nav drawer](http://www.google.com/design/spec/layout/structure.html#structure-side-nav).
+
+It can be used as standalone or in conjunction with [mat-drawer-panel](http://expandjs.com/elements/mat-drawer-panel).
+
+By default, the drawer is used for an app's main navigation. However, by setting `right`, it
+will move to the right side, where it can be used to show further details of a selected item.
+
+```html
+<mat-drawer-panel>
+    <mat-drawer target="content">Navigation</mat-drawer>
+    <mat-content id="content">Content</mat-content>
+    <mat-drawer target="content" right>Details</mat-drawer>
+</mat-drawer-panel>
+```
+
+Whenever the device's screen size is lower than the set `break-point`, the drawer will
+collapse itself automatically, freeing up the screen estate. By default, the `break-point`
+is 1280px for the navigation and 640px for the details.
+
+```html
+<mat-drawer-panel>
+
+    <mat-drawer target="content" break-point="960">
+        Will always be visible when the screen size is above 960px
+        and toggleable when the screen size is lower than 960px.
+    </mat-drawer>
+
+    <mat-content id="content">
+        The main content.
+    </mat-content>
+
+</mat-drawer-panel>
+```
+
+@element mat-drawer
+@description A custom element used to display a Material Design navigational drawer
+@keywords material design, material drawer panel, material side nav, web app, html5, expandjs, web-components
+@group containers
+@homepage http://expandjs.com/elements/mat-drawer
+@repository https://github.com/ExpandJS/mat-drawer
+
+@behavior xp-targeter-behavior /bower_components/xp-targeter-behavior/xp-targeter-behavior.html
+
+@dependency polymer Polymer/polymer#^1.1.0
+@dependency expandjs ExpandJS/expandjs#0.9.9
+@dependency iron-flex-layout PolymerElements/iron-flex-layout#^1.0.0
+@dependency mat-paper ExpandJS/mat-paper#0.9.9
+@dependency xp-device ExpandJS/xp-device#0.9.9
+@dependency xp-targeter-behavior ExpandJS/xp-targeter-behavior#0.9.9
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../expandjs/expandjs.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../mat-paper/mat-paper.html">
+<link rel="import" href="../xp-device/xp-device.html">
+<link rel="import" href="../xp-targeter-behavior/xp-targeter-behavior.html">
+
+<dom-module id="mat-drawer">
+
+    <template>
+
+        <style>
+            :host {
+                bottom: 0;
+                display: block;
+                overflow: visible;
+                position: absolute;
+                top: 0;
+            }
+
+            :host([empty]) {
+                display: none !important;
+            }
+
+            :host(:not([tracking]):not([showed])) {
+                visibility: hidden;
+            }
+
+            :host([right]) {
+                right: 0;
+            }
+
+            :host(:not[right]) {
+                left: 0;
+            }
+
+            :host([narrow]) {
+                @apply(--layout-fit);
+                z-index: 9999 !important;
+            }
+
+            :host #matDrawerBackdrop {
+                @apply(--layout-fit);
+                background: hsla(0, 0%, 0%, 0.5);
+                opacity: 0;
+                -webkit-transition: opacity 0.33s cubic-bezier(0.55, 0, 0.01, 1), visibility 0.33s cubic-bezier(0.55, 0, 0.01, 1);
+                transition: opacity 0.33s cubic-bezier(0.55, 0, 0.01, 1), visibility 0.33s cubic-bezier(0.55, 0, 0.01, 1);
+                will-change: opacity, visibility;
+            }
+
+            :host([tracking]) #matDrawerBackdrop {
+                -webkit-transition: none;
+                transition: none;
+            }
+
+            :host([showed]) #matDrawerBackdrop {
+                opacity: 1;
+            }
+
+            :host(:not([narrow])) #matDrawerBackdrop {
+                display: none !important;
+            }
+
+            :host #matDrawerWrapper {
+                @apply(--layout-horizontal);
+                height: 100%;
+                pointer-events: none !important;
+                position: relative;
+            }
+
+            :host([narrow]) #matDrawerWrapper {
+                @apply(--layout-fit);
+            }
+
+            :host([right]) #matDrawerWrapper {
+                @apply(--layout-end-justified);
+            }
+
+            :host #matDrawerSpacer {
+                min-width: 56px;
+            }
+
+            :host([right]) #matDrawerSpacer,
+            :host(:not([narrow])) #matDrawerSpacer {
+                display: none !important;
+            }
+
+            :host(:not([right])) #matDrawerSpacer {
+                -ms-flex-order: 2;
+                -webkit-order: 2;
+                order: 2;
+            }
+
+            :host #matDrawerColumn {
+                height: 100%;
+                overflow: visible;
+                pointer-events: auto !important;
+                -webkit-transform: translateX(-100%);
+                transform: translateX(-100%);
+                -webkit-transition: -webkit-transform 0.33s cubic-bezier(0.55, 0, 0.01, 1), visibility 0.33s cubic-bezier(0.55, 0, 0.01, 1);
+                transition: transform 0.33s cubic-bezier(0.55, 0, 0.01, 1), visibility 0.33s cubic-bezier(0.55, 0, 0.01, 1);
+                will-change: -webkit-transform, transform, visibility;
+            }
+
+            :host([tracking]) #matDrawerColumn {
+                -webkit-transition: none;
+                transition: none;
+            }
+
+            :host([right]) #matDrawerColumn {
+                -webkit-transform: translateX(100%);
+                transform: translateX(100%);
+                width: 100%;
+            }
+
+            :host([showed]) #matDrawerColumn {
+                -webkit-transform: translateX(0%);
+                transform: translateX(0%);
+            }
+
+            :host(:not([right])) #matDrawerColumn {
+                max-width: 400px;
+                min-width: 256px;
+                -ms-flex-order: 1;
+                -webkit-order: 1;
+                order: 1;
+            }
+
+            :host(:not([right])) #matDrawerColumn[z="0"] {
+                border-right-width: 1px;
+            }
+
+            :host([mobile]:not([device="tablet"]):not([right])) #matDrawerColumn {
+                @apply(--layout-flex);
+                max-width: 400px;
+            }
+        </style>
+
+        <xp-device id="matDrawerDevice" mobile="{{mobile}}" type="{{device}}"></xp-device>
+        <div id="matDrawerBackdrop" on-tap="_handleHide"></div>
+        <div id="matDrawerWrapper">
+            <div id="matDrawerSpacer"></div>
+            <mat-paper id="matDrawerColumn" background="[[background]]" z="[[_computeZ(narrow, raised)]]">
+                <content id="content"></content>
+            </mat-paper>
+        </div>
+
+    </template>
+
+    <script>
+        Polymer({
+
+            // ELEMENT
+            is: 'mat-drawer',
+
+            // BEHAVIORS
+            behaviors: [
+                Polymer.XPTargeterBehavior
+            ],
+
+            /*********************************************************************/
+
+            /**
+             * Fired when the showed attribute is set to true.
+             *
+             * @event xp-toggle
+             * @param {Element} firer
+             * @param {boolean} isShowed
+             * @bubbles
+             */
+
+            /*********************************************************************/
+
+            /**
+             * Hides the drawer.
+             *
+             * @method hide
+             * @returns {Element}
+             */
+            hide: function () {
+                var self = this;
+                if (self.narrow || self.right) { self.showed = false; }
+                return self;
+            },
+
+            /**
+             * Shows the drawer.
+             *
+             * @method show
+             * @returns {Element}
+             */
+            show: function () {
+                var self = this;
+                self.showed = true;
+                return self;
+            },
+
+            /**
+             * Toggles the drawer.
+             *
+             * @method toggle
+             * @returns {Element}
+             */
+            toggle: function () {
+                return this[this.showed ? 'hide' : 'show']();
+            },
+
+            /*********************************************************************/
+
+            /**
+             * Updates the drawer's narrow state.
+             *
+             * @method _updateNarrow
+             * @returns {Element}
+             * @private
+             */
+            _updateNarrow: function () {
+
+                // Vars
+                var self = this;
+
+                // Setting
+                self._setNarrow((self.mobile && !self.right) || window.innerWidth < self.breakPoint);
+                self.showed = self.right ? self.showed : !self.narrow;
+
+                return self;
+            },
+
+            /**
+             * Updates the drawer's offset.
+             *
+             * @method _updateOffset
+             * @param {number} [offset]
+             * @param {boolean} [instant = false]
+             * @returns {Element}
+             * @private
+             */
+            _updateOffset: function (offset, instant) {
+
+                // Vars
+                var self   = this,
+                    side   = self.right ? 'right' : 'left',
+                    target = self.findTarget();
+
+                // Updating
+                if (!XP.isNumber(offset)) { self._updateWidth(); }
+
+                // Setting
+                self._setOffset(!XP.isNumber(offset) ? (self.showed ? self.width : 0) : XP.within(offset, 0, self.width));
+
+                // Styling
+                XP.setStyle(target, '-webkit-transition', !instant && !self.tracking ? side + ' 0.33s cubic-bezier(0.55, 0, 0.01, 1)' : null);
+                XP.setStyle(target, 'transition', !instant && !self.tracking ? side + ' 0.33s cubic-bezier(0.55, 0, 0.01, 1)' : null);
+                XP.setStyle(target, side, !self.narrow ? self.offset + 'px' : null);
+
+                return self;
+            },
+
+            /**
+             * Updates the drawer's styles.
+             *
+             * @method _updateStyles
+             * @returns {Element}
+             * @private
+             */
+            _updateStyles: function () {
+
+                // Vars
+                var self   = this,
+                    offset = (self.width - self.offset) * (self.right ? 1 : -1),
+                    apply  = self.tracking || (self.offset && offset);
+
+                XP.setStyle(self.$.matDrawerColumn, '-webkit-transform', apply ? 'translateX(' + offset + 'px)' : null);
+                XP.setStyle(self.$.matDrawerColumn, 'transform', apply ? 'translateX(' + offset + 'px)' : null);
+                XP.setStyle(self.$.matDrawerBackdrop, 'opacity', apply ? self.offset / self.width : null);
+            },
+
+            /**
+             * Updates the drawer's width.
+             *
+             * @method _updateWidth
+             * @returns {Element}
+             * @private
+             */
+            _updateWidth: function () {
+
+                // Vars
+                var self = this;
+
+                // Setting
+                self._setWidth(XP.getBoundings(self.$.matDrawerColumn).width);
+
+                return self;
+            },
+
+            /*********************************************************************/
+
+            // ATTRIBUTES
+            hostAttributes: {
+                'drawer': true
+            },
+
+            // LISTENERS
+            listeners: {
+                'xp-select': '_handleSelect'
+            },
+
+            // OBSERVERS
+            observers: [
+                '_updateNarrow(breakPoint, mobile, right)',
+                '_updateOffset(target)',
+                '_updateStyles(offset, tracking)'
+            ],
+
+            // PROPERTIES
+            properties: {
+
+                /**
+                 * If set to true, the drawer will not close by selecting something inside.
+                 *
+                 * @attribute auto-hide-disabled
+                 * @type boolean
+                 * @default false
+                 */
+                autoHideDisabled: {
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: false
+                },
+
+                /**
+                 * The paper's background color.
+                 *
+                 * @attribute background
+                 * @type string
+                 */
+                background: {
+                    reflectToAttribute: true,
+                    type: String,
+                    value: null
+                },
+
+                /**
+                 * The breakpoint for the drawer's narrow state.
+                 *
+                 * @attribute break-point
+                 * @type number
+                 */
+                breakPoint: {
+                    reflectToAttribute: true,
+                    type: Number,
+                    value: null
+                },
+
+                /**
+                 * If set to true, the drawer is hidden.
+                 *
+                 * @attribute empty
+                 * @type boolean
+                 * @default false
+                 * @notifies
+                 * @readonly
+                 */
+                empty: {
+                    notify: true,
+                    readOnly: true,
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: false
+                },
+
+                /**
+                 * If set to true, the viewport is smaller then the drawer's breakpoint.
+                 * In such case, the drawer will be automatically closed.
+                 *
+                 * @attribute narrow
+                 * @type boolean
+                 * @default false
+                 * @notifies
+                 * @readonly
+                 */
+                narrow: {
+                    notify: true,
+                    readOnly: true,
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: false
+                },
+
+                /**
+                 * The drawer's offset from the screen's edge.
+                 *
+                 * @attribute offset
+                 * @type number
+                 * @default 0
+                 * @notifies
+                 * @readonly
+                 */
+                offset: {
+                    notify: true,
+                    readOnly: true,
+                    type: Number,
+                    value: 0
+                },
+
+                /**
+                 * If set to true, the panel is raised.
+                 *
+                 * @attribute raised
+                 * @type boolean
+                 * @default false
+                 */
+                raised: {
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: false
+                },
+
+                /**
+                 * If set to true, the drawer is on the right side.
+                 *
+                 * @attribute right
+                 * @type boolean
+                 * @default false
+                 */
+                right: {
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: false
+                },
+
+                /**
+                 * If set to true, the drawer is visible.
+                 *
+                 * @attribute showed
+                 * @type boolean
+                 * @default false
+                 * @notifies
+                 */
+                showed: {
+                    notify: true,
+                    observer: '_showedChanged',
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: false
+                },
+
+                /**
+                 * The element being tracked.
+                 *
+                 * @attribute tracked
+                 * @type Element
+                 * @notifies
+                 * @readonly
+                 */
+                tracked: {
+                    notify: true,
+                    observer: '_trackedChanged',
+                    readOnly: true,
+                    value: null
+                },
+
+                /**
+                 * If set to true, the drawer is being tracked.
+                 *
+                 * @attribute tracking
+                 * @type boolean
+                 * @default false
+                 * @notifies
+                 * @readonly
+                 */
+                tracking: {
+                    notify: true,
+                    readOnly: true,
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: false
+                },
+
+                /**
+                 * The drawer's column's width.
+                 *
+                 * @attribute width
+                 * @type number
+                 * @notifies
+                 * @readonly
+                 */
+                width: {
+                    notify: true,
+                    readOnly: true,
+                    type: Number,
+                    value: null
+                }
+            },
+
+            /*********************************************************************/
+
+            // COMPUTER
+            _computeZ: function (narrow, raised) {
+                return narrow || raised ? 16 : 0;
+            },
+
+            /*********************************************************************/
+
+            // OBSERVER
+            _showedChanged: function (post) {
+                this.fire('xp-toggle', {firer: this._updateOffset(), isShowed: post});
+            },
+
+            // OBSERVER
+            _trackedChanged: function (post) {
+                this._setTracking(!!post);
+            },
+
+            /*********************************************************************/
+
+            // LISTENER
+            attached: function () {
+
+                // Vars
+                var self = this;
+
+                // Mutating
+                self.mutated();
+
+                // Updating
+                self._updateOffset(null, true);
+
+                // Listening
+                self.listen(self.parentElement, 'track', '_handleTrack');
+                self.listen(window, 'keyup', '_handleHide');
+                self.listen(window, 'resize', '_handleResize');
+            },
+
+            // LISTENER
+            detached: function () {
+
+                // Vars
+                var self = this;
+
+                // Unlistening
+                self.unlisten(self.parentElement, 'track', '_handleTrack');
+                self.unlisten(window, 'keyup', '_handleHide');
+                self.unlisten(window, 'resize', '_handleResize');
+            },
+
+            // LISTENER
+            mutated: function () {
+
+                // Vars
+                var self = this;
+
+                // Setting
+                self._setEmpty(!XP.isContent(Polymer.dom(self.$.content), true));
+
+                // Observing
+                XP.onMutation(self, self.mutated.bind(self));
+            },
+
+            // LISTENER
+            ready: function () {
+
+                // Vars
+                var self = this;
+
+                // Setting
+                self.breakPoint = self.breakPoint || (self.right ? 640 : 1280);
+            },
+
+            /*********************************************************************/
+
+            // HANDLER
+            _handleHide: function (event) {
+
+                // Hiding
+                if (event.keyCode === 27 || (!event.keyCode && !event.button)) { this.hide(); }
+            },
+
+            // HANDLER
+            _handleResize: function () {
+
+                // Updating
+                this._updateNarrow();
+            },
+
+            // HANDLER
+            _handleSelect: function (event) {
+
+                // Vars
+                var self = this;
+
+                // Checking
+                if (self.autoHideDisabled || self.right || !event.detail.isSelected || event.detail.multi) { return; }
+
+                // Hiding
+                XP.delay(function () { return !event.defaultPrevented && self.hide(); });
+            },
+
+            // HANDLER
+            _handleTrack: function (event) {
+
+                // Vars
+                var self    = this,
+                    mouse   = event.detail.sourceEvent.type === 'mousemove',
+                    state   = event.detail.state,
+                    showed  = self.showed,
+                    tracked = self.tracked;
+
+                // Tracking
+                if (!tracked && !mouse && state === 'start') { tracked = XP.includes(Polymer.dom(event).path, self) ? self : event.currentTarget; }
+
+                // Checking
+                if (!tracked || mouse || (state === 'start' && tracked !== self && (event.detail.x > 48 || self.right))) { return; }
+
+                // Switching
+                switch (state) {
+
+                // TRACK
+                case 'track':
+                    self._updateOffset(self.offset + event.detail.ddx * (self.right ? -1 : 1));
+                    break;
+
+                // START
+                case 'start':
+                    self._setTracked(tracked);
+                    self._updateWidth();
+                    self._updateOffset(self.offset + event.detail.dx * (self.right ? -1 : 1));
+                    break;
+
+                // END
+                case 'end':
+                    self._setTracked(null);
+                    self.showed = self.offset > self.width / 2;
+                    if (showed === self.showed) { self._updateOffset(); }
+                    break;
+                }
+            }
+        });
+    </script>
+
+</dom-module>

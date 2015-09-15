@@ -1,0 +1,145 @@
+<!--
+@license
+Copyright (c) 2015 The ExpandJS authors. All rights reserved.
+This code may only be used under the BSD style license found at https://expandjs.github.io/LICENSE.txt
+The complete set of authors may be found at https://expandjs.github.io/AUTHORS.txt
+The complete set of contributors may be found at https://expandjs.github.io/CONTRIBUTORS.txt
+-->
+
+<!--
+An element used to wrap a [Material Design application](http://www.google.com/design/spec/layout/structure.html#structure-ui-regions), giving it a base scaffold.
+
+```html
+<mat-drawer-panel>
+
+    <mat-drawer>...</mat-drawer>
+
+    <mat-header-panel>
+        <mat-header>...</mat-header>
+        <mat-content>...</mat-content>
+    </mat-header-panel>
+
+    <mat-drawer right>...</mat-drawer>
+
+</mat-drawer-panel>
+```
+
+@element mat-drawer-panel
+@description A custom element used to wrap a Material Design app
+@keywords material design, material app, web app, html5, expandjs, web-components
+@group containers
+@homepage http://expandjs.com/elements/mat-drawer-panel
+@repository https://github.com/ExpandJS/mat-drawer-panel
+
+@dependency polymer Polymer/polymer#^1.1.0
+@dependency expandjs ExpandJS/expandjs#0.9.9
+@dependency iron-flex-layout PolymerElements/iron-flex-layout#^1.0.0
+@dependency mat-paper ExpandJS/mat-paper#0.9.9
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../expandjs/expandjs.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../mat-paper/mat-paper.html">
+
+<dom-module id="mat-drawer-panel">
+
+    <template>
+
+        <style>
+            :host {
+                @apply(--layout-fit);
+                display: block;
+                overflow: visible;
+                text-align: left;
+            }
+
+            :host #matDrawerPanelWrapper {
+                height: 100%;
+            }
+        </style>
+
+        <mat-paper id="matDrawerPanelWrapper" background="[[background]]" brightness="backdrop">
+            <content id="rightContent" select='[drawer=""][right=""]'></content>
+            <content id="content" select=':not([drawer=""])'></content>
+            <content id="leftContent" select='[drawer=""]'></content>
+        </mat-paper>
+
+    </template>
+
+    <script>
+        Polymer({
+
+            // ELEMENT
+            is: 'mat-drawer-panel',
+
+            /*********************************************************************/
+
+            // PROPERTIES
+            properties: {
+
+                /**
+                 * The paper's background color.
+                 *
+                 * @attribute background
+                 * @type string
+                 */
+                background: {
+                    reflectToAttribute: true,
+                    type: String,
+                    value: null
+                },
+
+                /**
+                 * The left drawer.
+                 *
+                 * @attribute drawer
+                 * @type Element
+                 * @notifies
+                 * @readonly
+                 */
+                drawer: {
+                    notify: true,
+                    readOnly: true,
+                    value: null
+                },
+
+                /**
+                 * The right drawer.
+                 *
+                 * @attribute right-drawer
+                 * @type Element
+                 * @notifies
+                 * @readonly
+                 */
+                rightDrawer: {
+                    notify: true,
+                    readOnly: true,
+                    value: null
+                }
+            },
+
+            /*********************************************************************/
+
+            // LISTENER
+            attached: function () {
+                this.mutated();
+            },
+
+            // LISTENER
+            mutated: function () {
+
+                // Vars
+                var self = this;
+
+                // Setting
+                self._setDrawer(XP.getDistributedElement(Polymer.dom(self.$.leftContent), '[drawer=""]'));
+                self._setRightDrawer(XP.getDistributedElement(Polymer.dom(self.$.rightContent), '[drawer=""]'));
+
+                // Observing
+                XP.onMutation(self, self.mutated.bind(self));
+            }
+        });
+    </script>
+
+</dom-module>

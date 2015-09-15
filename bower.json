@@ -1,0 +1,32 @@
+{
+  "name": "mat-drawer-panel",
+  "license": "BSD-3-Clause",
+  "version": "0.9.9",
+  "main": "mat-drawer-panel.html",
+  "description": "A custom element used to wrap a Material Design app",
+  "homepage": "http://expandjs.com/elements/mat-drawer-panel",
+  "authors": [
+    "Giuliano Rullo <g.rullo@expandjs.com>",
+    "Maurizio Stefàno <m.stefano@expandjs.com>",
+    "Robert Manolea <r.manolea@expandjs.com>"
+  ],
+  "keywords": [
+    "material design",
+    "material app",
+    "web app",
+    "html5",
+    "expandjs",
+    "web-components"
+  ],
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "expandjs": "ExpandJS/expandjs#0.9.9",
+    "mat-paper": "ExpandJS/mat-paper#0.9.9",
+    "xp-device": "ExpandJS/xp-device#0.9.9",
+    "xp-targeter-behavior": "ExpandJS/xp-targeter-behavior#0.9.9",
+    "polymer": "Polymer/polymer#^1.1.0",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#^1.0.0"
+  }
+}
