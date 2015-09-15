@@ -122,18 +122,16 @@ is 1280px for the navigation and 640px for the details.
             }
 
             :host #matDrawerWrapper {
-                @apply(--layout-horizontal);
                 height: 100%;
                 pointer-events: none !important;
-                position: relative;
             }
 
             :host([narrow]) #matDrawerWrapper {
                 @apply(--layout-fit);
             }
 
-            :host([right]) #matDrawerWrapper {
-                @apply(--layout-end-justified);
+            :host(:not([right])) #matDrawerWrapper {
+                @apply(--layout-horizontal);
             }
 
             :host #matDrawerSpacer {
@@ -155,6 +153,7 @@ is 1280px for the navigation and 640px for the details.
                 height: 100%;
                 overflow: visible;
                 pointer-events: auto !important;
+                position: relative;
                 -webkit-transform: translateX(-100%);
                 transform: translateX(-100%);
                 -webkit-transition: -webkit-transform 0.33s cubic-bezier(0.55, 0, 0.01, 1), visibility 0.33s cubic-bezier(0.55, 0, 0.01, 1);
@@ -170,7 +169,6 @@ is 1280px for the navigation and 640px for the details.
             :host([right]) #matDrawerColumn {
                 -webkit-transform: translateX(100%);
                 transform: translateX(100%);
-                width: 100%;
             }
 
             :host([showed]) #matDrawerColumn {
