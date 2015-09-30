@@ -51,11 +51,11 @@ is 1280px for the navigation and 640px for the details.
 @behavior xp-targeter-behavior /bower_components/xp-targeter-behavior/xp-targeter-behavior.html
 
 @dependency polymer Polymer/polymer#^1.1.0
-@dependency expandjs ExpandJS/expandjs#0.9.9
+@dependency expandjs ExpandJS/expandjs#0.9.10
 @dependency iron-flex-layout PolymerElements/iron-flex-layout#^1.0.0
-@dependency mat-paper ExpandJS/mat-paper#0.9.9
-@dependency xp-device ExpandJS/xp-device#0.9.9
-@dependency xp-targeter-behavior ExpandJS/xp-targeter-behavior#0.9.9
+@dependency mat-paper ExpandJS/mat-paper#0.9.10
+@dependency xp-device ExpandJS/xp-device#0.9.10
+@dependency xp-targeter-behavior ExpandJS/xp-targeter-behavior#0.9.10
 -->
 
 <link rel="import" href="../polymer/polymer.html">
@@ -296,15 +296,16 @@ is 1280px for the navigation and 640px for the details.
             _updateOffset: function (offset, instant) {
 
                 // Vars
-                var self   = this,
-                    side   = self.right ? 'right' : 'left',
-                    target = self.findTarget();
+                var self    = this,
+                    defined = XP.isNumber(offset),
+                    side    = self.right ? 'right' : 'left',
+                    target  = self.findTarget();
 
                 // Updating
-                if (!XP.isNumber(offset)) { self._updateWidth(); }
+                if (!defined) { self._updateWidth(); }
 
                 // Setting
-                self._setOffset(!XP.isNumber(offset) ? (self.showed ? self.width : 0) : XP.within(offset, 0, self.width));
+                self._setOffset(!defined ? (self.showed ? self.width : 0) : XP.within(offset, 0, self.width));
 
                 // Styling
                 XP.setStyle(target, '-webkit-transition', !instant && !self.tracking ? side + ' 0.33s cubic-bezier(0.55, 0, 0.01, 1)' : null);
@@ -504,6 +505,19 @@ is 1280px for the navigation and 640px for the details.
                 },
 
                 /**
+                 * If set to true, the swipe gesture is disabled.
+                 *
+                 * @attribute swipe-disabled
+                 * @type boolean
+                 * @default false
+                 */
+                swipeDisabled: {
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: false
+                },
+
+                /**
                  * The element being tracked.
                  *
                  * @attribute tracked
@@ -515,6 +529,7 @@ is 1280px for the navigation and 640px for the details.
                     notify: true,
                     observer: '_trackedChanged',
                     readOnly: true,
+                    type: Object,
                     value: null
                 },
 
@@ -659,16 +674,16 @@ is 1280px for the navigation and 640px for the details.
 
                 // Vars
                 var self    = this,
-                    mouse   = event.detail.sourceEvent.type === 'mousemove',
                     state   = event.detail.state,
+                    swipe   = event.detail.sourceEvent.type !== 'mousemove' && !self.swipeDisabled,
                     showed  = self.showed,
                     tracked = self.tracked;
 
                 // Tracking
-                if (!tracked && !mouse && state === 'start') { tracked = XP.includes(Polymer.dom(event).path, self) ? self : event.currentTarget; }
+                if (!tracked && swipe && state === 'start') { tracked = XP.includes(Polymer.dom(event).path, self) ? self : event.currentTarget; }
 
                 // Checking
-                if (!tracked || mouse || (state === 'start' && tracked !== self && (event.detail.x > 48 || self.right))) { return; }
+                if (!tracked || !swipe || (state === 'start' && tracked !== self && (event.detail.x > 48 || self.right))) { return; }
 
                 // Switching
                 switch (state) {
