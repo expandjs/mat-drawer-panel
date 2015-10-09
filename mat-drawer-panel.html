@@ -14,14 +14,14 @@ It should be used in conjunction with [mat-drawer](http://expandjs.com/elements/
 ```html
 <mat-drawer-panel>
 
-    <mat-drawer>...</mat-drawer>
+    <mat-drawer target="content">...</mat-drawer>
 
-    <mat-header-panel>
+    <mat-header-panel id="content">
         <mat-header>...</mat-header>
         <mat-content>...</mat-content>
     </mat-header-panel>
 
-    <mat-drawer right>...</mat-drawer>
+    <mat-drawer target="content" right>...</mat-drawer>
 
 </mat-drawer-panel>
 ```
