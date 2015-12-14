@@ -671,6 +671,7 @@ is 1280px for the navigation and 640px for the details.
 
                 // Vars
                 var self   = this,
+                    other  = self.right ? 'left' : 'right',
                     side   = self.right ? 'right' : 'left',
                     target = self.findTarget() || self.tracker;
 
@@ -685,8 +686,9 @@ is 1280px for the navigation and 640px for the details.
                 target.style.bottom     = 0;
                 target.style.top        = 0;
                 target.style.position   = 'absolute';
-                target.style.transition = target.style.webkitTransition = instant || self.tracking ? '' : side + ' 0.33s cubic-bezier(0.55, 0, 0.01, 1)';
-                target.style[side]      = self.narrow ? '' : self.offset + 'px';
+                target.style.transition = target.style.webkitTransition = !instant && !self.tracking ? side + ' 0.33s cubic-bezier(0.55, 0, 0.01, 1)' : '';
+                target.style[other]     = target.style[other] || 0;
+                target.style[side]      = !self.narrow ? self.offset + 'px' : 0;
             },
 
             // HANDLER
