@@ -7,18 +7,19 @@ The complete set of contributors may be found at https://expandjs.github.io/CONT
 -->
 
 <!--
-An element used to display a [Material Design nav drawer](http://www.google.com/design/spec/layout/structure.html#structure-side-nav).
+A custom element used to display a [Material Design side drawer](http://www.google.com/design/spec/layout/structure.html#structure-side-nav).
 
-It should be used in conjunction with [mat-drawer-panel](http://expandjs.com/elements/mat-drawer-panel).
+It can be used in conjunction with
+[mat-drawer-panel](http://expandjs.com/elements/mat-drawer-panel).
 
 By default, the drawer is used for an app's main navigation. However, by setting `right`, it
 will move to the right side, where it can be used to show further details of a selected item.
 
 ```html
 <mat-drawer-panel>
-    <mat-drawer target="content">Navigation</mat-drawer>
-    <mat-content id="content">Content</mat-content>
-    <mat-drawer target="content" right>Details</mat-drawer>
+    <mat-drawer>Navigation</mat-drawer>
+    <mat-header-panel>Main</mat-header-panel>
+    <mat-drawer right>Details</mat-drawer>
 </mat-drawer-panel>
 ```
 
@@ -29,154 +30,163 @@ is 1280px for the navigation and 640px for the details.
 ```html
 <mat-drawer-panel>
 
-    <mat-drawer target="content" break-point="960">
+    <mat-drawer break-point="960">
         Will always be visible when the screen size is above 960px
         and toggleable when the screen size is lower than 960px.
     </mat-drawer>
 
-    <mat-content id="content">
+    <mat-header-panel>
         The main content.
-    </mat-content>
+    </mat-header-panel>
 
 </mat-drawer-panel>
 ```
 
 @element mat-drawer
-@description A custom element used to display a Material Design navigational drawer
-@keywords material design, material drawer panel, material side nav, web app, html5, expandjs, web-components
+@description A custom element used to display a Material Design side drawer
+@keywords material design, material drawer panel, expandjs, web app, custom elements, web-components
 @group containers
+@hot
+
 @homepage http://expandjs.com/elements/mat-drawer
 @repository https://github.com/ExpandJS/mat-drawer-panel
 
-@behavior xp-targeter-behavior /bower_components/xp-targeter-behavior/xp-targeter-behavior.html
+@behavior xp-device-behavior /bower_components/xp-device/xp-device-behavior.html
+@behavior xp-refirer-behavior /bower_components/xp-refirer-behavior/xp-refirer-behavior.html
 
-@dependency polymer Polymer/polymer#^1.1.0
-@dependency expandjs ExpandJS/expandjs#0.9.11
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
 @dependency iron-flex-layout PolymerElements/iron-flex-layout#^1.0.0
-@dependency mat-paper ExpandJS/mat-paper#0.9.11
-@dependency xp-device ExpandJS/xp-device#0.9.11
-@dependency xp-targeter-behavior ExpandJS/xp-targeter-behavior#0.9.11
+@dependency mat-paper ExpandJS/mat-paper#0.10.0
+@dependency xp-device ExpandJS/xp-device#0.10.0
+@dependency xp-media-query ExpandJS/xp-media-query#0.10.0
+@dependency xp-refirer-behavior ExpandJS/xp-refirer-behavior#0.10.0
 -->
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../expandjs/expandjs.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../mat-paper/mat-paper.html">
-<link rel="import" href="../xp-device/xp-device.html">
+<link rel="import" href="../xp-device/xp-device-behavior.html">
+<link rel="import" href="../xp-media-query/xp-media-query.html">
+<link rel="import" href="../xp-refirer-behavior/xp-refirer-behavior.html">
 <link rel="import" href="../xp-targeter-behavior/xp-targeter-behavior.html">
 
 <dom-module id="mat-drawer">
 
-    <template>
+    <template strip-whitespace>
 
         <style>
             :host {
                 bottom: 0;
                 display: block;
-                overflow: visible;
+                pointer-events: none !important;
                 position: absolute;
                 top: 0;
             }
 
-            :host([empty]) {
+            :host([empty]:not([right])) {
                 display: none !important;
+            }
+
+            :host([narrow]) {
+                z-index: 9999 !important;
+            }
+
+            :host([narrow]),
+            :host([right]) {
+                right: 0;
+            }
+
+            :host([narrow]),
+            :host(:not([right])) {
+                left: 0;
             }
 
             :host(:not([tracking]):not([showed])) {
                 visibility: hidden;
             }
 
-            :host([right]) {
-                right: 0;
-            }
-
-            :host(:not[right]) {
-                left: 0;
-            }
-
-            :host([narrow]) {
-                @apply(--layout-fit);
-                z-index: 9999 !important;
-            }
-
-            :host #matDrawerBackdrop {
+            :host .backdrop {
                 @apply(--layout-fit);
                 background: hsla(0, 0%, 0%, 0.5);
                 opacity: 0;
+                pointer-events: auto !important;
                 -webkit-transition: opacity 0.33s cubic-bezier(0.55, 0, 0.01, 1), visibility 0.33s cubic-bezier(0.55, 0, 0.01, 1);
                 transition: opacity 0.33s cubic-bezier(0.55, 0, 0.01, 1), visibility 0.33s cubic-bezier(0.55, 0, 0.01, 1);
-                will-change: opacity, visibility;
             }
 
-            :host([tracking]) #matDrawerBackdrop {
+            :host([showed]) .backdrop {
+                opacity: 1;
+            }
+
+            :host([tracking]) .backdrop {
                 -webkit-transition: none;
                 transition: none;
             }
 
-            :host([showed]) #matDrawerBackdrop {
-                opacity: 1;
-            }
-
-            :host(:not([narrow])) #matDrawerBackdrop {
+            :host(:not([narrow])) .backdrop {
                 display: none !important;
             }
 
-            :host #matDrawerWrapper {
+            :host .wrapper {
                 height: 100%;
-                pointer-events: none !important;
             }
 
-            :host([narrow]) #matDrawerWrapper {
+            :host([narrow]) .wrapper {
                 @apply(--layout-fit);
             }
 
-            :host(:not([right])) #matDrawerWrapper {
+            :host(:not([right])) .wrapper {
                 @apply(--layout-horizontal);
             }
 
-            :host #matDrawerSpacer {
+            :host .spacer {
                 min-width: 56px;
             }
 
-            :host([right]) #matDrawerSpacer,
-            :host(:not([narrow])) #matDrawerSpacer {
+            :host([right]) .spacer,
+            :host(:not([narrow])) .spacer {
                 display: none !important;
             }
 
-            :host(:not([right])) #matDrawerSpacer {
+            :host(:not([right])) .spacer {
                 -ms-flex-order: 2;
                 -webkit-order: 2;
                 order: 2;
             }
 
-            :host #matDrawerColumn {
+            :host .column {
                 height: 100%;
-                overflow: visible;
+                overflow-x: hidden;
+                overflow-y: auto;
                 pointer-events: auto !important;
                 position: relative;
-                -webkit-transform: translateX(-100%);
-                transform: translateX(-100%);
                 -webkit-transition: -webkit-transform 0.33s cubic-bezier(0.55, 0, 0.01, 1), visibility 0.33s cubic-bezier(0.55, 0, 0.01, 1);
                 transition: transform 0.33s cubic-bezier(0.55, 0, 0.01, 1), visibility 0.33s cubic-bezier(0.55, 0, 0.01, 1);
-                will-change: -webkit-transform, transform, visibility;
             }
 
-            :host([tracking]) #matDrawerColumn {
-                -webkit-transition: none;
-                transition: none;
-            }
-
-            :host([right]) #matDrawerColumn {
+            :host([right]) .column {
                 -webkit-transform: translateX(100%);
                 transform: translateX(100%);
             }
 
-            :host([showed]) #matDrawerColumn {
+            :host(:not([right])) .column {
+                -webkit-transform: translateX(-100%);
+                transform: translateX(-100%);
+            }
+
+            :host([showed][narrow]) .column {
                 -webkit-transform: translateX(0%);
                 transform: translateX(0%);
             }
 
-            :host(:not([right])) #matDrawerColumn {
+            :host([tracking]) .column {
+                -webkit-transition: none;
+                transition: none;
+            }
+
+            :host(:not([right])) .column {
                 max-width: 400px;
                 min-width: 256px;
                 -ms-flex-order: 1;
@@ -184,23 +194,30 @@ is 1280px for the navigation and 640px for the details.
                 order: 1;
             }
 
-            :host(:not([right])) #matDrawerColumn[z="0"] {
+            :host(:not([right])) .column:not([z]) {
                 border-right-width: 1px;
             }
 
-            :host([mobile]:not([device="tablet"]):not([right])) #matDrawerColumn {
-                @apply(--layout-flex);
-                max-width: 400px;
+            :host ::content mat-header-panel[mode="seamed"] mat-header[brightness="toolbar"] {
+                background: transparent;
+            }
+
+            @media (max-width: 480px) {
+
+                :host(:not([right])) .column {
+                    @apply(--layout-flex);
+                    max-width: 320px;
+                }
             }
         </style>
 
-        <xp-device id="matDrawerDevice" mobile="{{mobile}}" type="{{device}}"></xp-device>
-        <div id="matDrawerBackdrop" on-tap="_handleHide"></div>
-        <div id="matDrawerWrapper">
-            <div id="matDrawerSpacer"></div>
-            <mat-paper id="matDrawerColumn" background="[[background]]" z="[[_computeZ(narrow, raised)]]">
-                <content id="content"></content>
-            </mat-paper>
+        <xp-media-query query="(max-width: 960px)" matched="{{mobile}}"></xp-media-query>
+
+        <div class="backdrop" on-click="_handleHide"></div>
+
+        <div class="wrapper" on-xp-select="_handleSelect">
+            <div class="spacer"></div>
+            <mat-paper class="column" padding="[[padding]]" z="[[_computeZ(narrow, raised)]]"><content></content></mat-paper>
         </div>
 
     </template>
@@ -213,19 +230,10 @@ is 1280px for the navigation and 640px for the details.
 
             // BEHAVIORS
             behaviors: [
+                Polymer.XPDeviceBehavior,
+                Polymer.XPRefirerBehavior,
                 Polymer.XPTargeterBehavior
             ],
-
-            /*********************************************************************/
-
-            /**
-             * Fired when the showed attribute is set to true.
-             *
-             * @event xp-toggle
-             * @param {Element} firer
-             * @param {boolean} isShowed
-             * @bubbles
-             */
 
             /*********************************************************************/
 
@@ -260,115 +268,20 @@ is 1280px for the navigation and 640px for the details.
              * @returns {Element}
              */
             toggle: function () {
-                return this[this.showed ? 'hide' : 'show']();
-            },
-
-            /*********************************************************************/
-
-            /**
-             * Updates the drawer's narrow state.
-             *
-             * @method _updateNarrow
-             * @returns {Element}
-             * @private
-             */
-            _updateNarrow: function () {
-
-                // Vars
                 var self = this;
-
-                // Setting
-                self._setNarrow((self.mobile && !self.right) || window.innerWidth < self.breakPoint);
-                self.showed = self.right ? self.showed : !self.narrow;
-
-                return self;
-            },
-
-            /**
-             * Updates the drawer's offset.
-             *
-             * @method _updateOffset
-             * @param {number} [offset]
-             * @param {boolean} [instant = false]
-             * @returns {Element}
-             * @private
-             */
-            _updateOffset: function (offset, instant) {
-
-                // Vars
-                var self    = this,
-                    defined = XP.isNumber(offset),
-                    side    = self.right ? 'right' : 'left',
-                    target  = self.findTarget();
-
-                // Updating
-                if (!defined) { self._updateWidth(); }
-
-                // Setting
-                self._setOffset(!defined ? (self.showed ? self.width : 0) : XP.within(offset, 0, self.width));
-
-                // Styling
-                XP.setStyle(target, '-webkit-transition', !instant && !self.tracking ? side + ' 0.33s cubic-bezier(0.55, 0, 0.01, 1)' : null);
-                XP.setStyle(target, 'transition', !instant && !self.tracking ? side + ' 0.33s cubic-bezier(0.55, 0, 0.01, 1)' : null);
-                XP.setStyle(target, side, !self.narrow ? self.offset + 'px' : null);
-
-                return self;
-            },
-
-            /**
-             * Updates the drawer's styles.
-             *
-             * @method _updateStyles
-             * @returns {Element}
-             * @private
-             */
-            _updateStyles: function () {
-
-                // Vars
-                var self   = this,
-                    offset = (self.width - self.offset) * (self.right ? 1 : -1),
-                    apply  = self.tracking || (self.offset && offset);
-
-                XP.setStyle(self.$.matDrawerColumn, '-webkit-transform', apply ? 'translateX(' + offset + 'px)' : null);
-                XP.setStyle(self.$.matDrawerColumn, 'transform', apply ? 'translateX(' + offset + 'px)' : null);
-                XP.setStyle(self.$.matDrawerBackdrop, 'opacity', apply ? self.offset / self.width : null);
-            },
-
-            /**
-             * Updates the drawer's width.
-             *
-             * @method _updateWidth
-             * @returns {Element}
-             * @private
-             */
-            _updateWidth: function () {
-
-                // Vars
-                var self = this;
-
-                // Setting
-                self._setWidth(XP.getBoundings(self.$.matDrawerColumn).width);
-
+                self[self.showed ? 'hide' : 'show']();
                 return self;
             },
 
             /*********************************************************************/
-
-            // ATTRIBUTES
-            hostAttributes: {
-                'drawer': true
-            },
-
-            // LISTENERS
-            listeners: {
-                'xp-select': '_handleSelect'
-            },
 
             // OBSERVERS
             observers: [
-                '_updateNarrow(breakPoint, mobile, right)',
-                '_updateOffset(target)',
-                '_updateStyles(offset, tracking)'
+                '_breakPointChanged(breakPoint, mobile, right)',
+                '_offsetChanged(backdrop, column, offset, tracking)',
+                '_handleShift(column)',
+                '_handleShift(narrow)',
+                '_handleShift(showed)'
             ],
 
             // PROPERTIES
@@ -382,33 +295,57 @@ is 1280px for the navigation and 640px for the details.
                  * @default false
                  */
                 autoHideDisabled: {
-                    reflectToAttribute: true,
                     type: Boolean,
                     value: false
                 },
 
                 /**
-                 * The paper's background color.
+                 * The drawer's backdrop.
+                 *
+                 * @attribute backdrop
+                 * @type Element
+                 * @notifies
+                 * @readonly
+                 */
+                backdrop: {
+                    notify: true,
+                    readOnly: true
+                },
+
+                /**
+                 * The drawer's background color.
                  *
                  * @attribute background
                  * @type string
                  */
                 background: {
                     reflectToAttribute: true,
-                    type: String,
-                    value: null
+                    type: String
                 },
 
                 /**
-                 * The breakpoint for the drawer's narrow state.
+                 * The drawer's narrow breakpoint.
                  *
                  * @attribute break-point
                  * @type number
+                 * @notifies
                  */
                 breakPoint: {
-                    reflectToAttribute: true,
-                    type: Number,
-                    value: null
+                    notify: true,
+                    type: Number
+                },
+
+                /**
+                 * The drawer's column.
+                 *
+                 * @attribute column
+                 * @type Element
+                 * @notifies
+                 * @readonly
+                 */
+                column: {
+                    notify: true,
+                    readOnly: true
                 },
 
                 /**
@@ -429,8 +366,7 @@ is 1280px for the navigation and 640px for the details.
                 },
 
                 /**
-                 * If set to true, the viewport is smaller then the drawer's breakpoint.
-                 * In such case, the drawer will be automatically closed.
+                 * If set to true, the drawer is an overlay, because the viewport is smaller under its breakpoint.
                  *
                  * @attribute narrow
                  * @type boolean
@@ -463,13 +399,28 @@ is 1280px for the navigation and 640px for the details.
                 },
 
                 /**
-                 * If set to true, the panel is raised.
+                 * If set to true, the material spacing rules are applied.
+                 *
+                 * @attribute padding
+                 * @type boolean
+                 * @default false
+                 */
+                padding: {
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: false
+                },
+
+                /**
+                 * If set to true, the drawer is raised.
                  *
                  * @attribute raised
                  * @type boolean
                  * @default false
+                 * @notifies
                  */
                 raised: {
+                    notify: true,
                     reflectToAttribute: true,
                     type: Boolean,
                     value: false
@@ -498,7 +449,6 @@ is 1280px for the navigation and 640px for the details.
                  */
                 showed: {
                     notify: true,
-                    observer: '_showedChanged',
                     reflectToAttribute: true,
                     type: Boolean,
                     value: false
@@ -527,10 +477,20 @@ is 1280px for the navigation and 640px for the details.
                  */
                 tracked: {
                     notify: true,
-                    observer: '_trackedChanged',
-                    readOnly: true,
-                    type: Object,
-                    value: null
+                    readOnly: true
+                },
+
+                /**
+                 * The element to listen for tracking.
+                 *
+                 * @attribute tracker
+                 * @type Element
+                 * @notifies
+                 * @readonly
+                 */
+                tracker: {
+                    notify: true,
+                    readOnly: true
                 },
 
                 /**
@@ -543,6 +503,7 @@ is 1280px for the navigation and 640px for the details.
                  * @readonly
                  */
                 tracking: {
+                    computed: '_computeTracking(tracked)',
                     notify: true,
                     readOnly: true,
                     reflectToAttribute: true,
@@ -561,28 +522,51 @@ is 1280px for the navigation and 640px for the details.
                 width: {
                     notify: true,
                     readOnly: true,
-                    type: Number,
-                    value: null
+                    type: Number
                 }
             },
 
             /*********************************************************************/
 
             // COMPUTER
+            _computeTracking: function (tracked) {
+                return !!tracked;
+            },
+
+            // COMPUTER
             _computeZ: function (narrow, raised) {
-                return narrow || raised ? 16 : 0;
+                return narrow || raised ? 16 : null;
             },
 
             /*********************************************************************/
 
             // OBSERVER
-            _showedChanged: function (post) {
-                this.fire('xp-toggle', {firer: this._updateOffset(), isShowed: post});
+            _breakPointChanged: function () {
+
+                // Vars
+                var self = this;
+
+                // Setting
+                self._setNarrow((self.mobile && !self.right) || window.innerWidth < self.breakPoint);
+
+                // Handling
+                if (!self.right && self.showed === self.narrow) { self.async(self._handleShift.bind(self, null, true)); }
+
+                // Showing
+                if (!self.right) { self.showed = !self.narrow; }
             },
 
             // OBSERVER
-            _trackedChanged: function (post) {
-                this._setTracking(!!post);
+            _offsetChanged: function () {
+
+                // Vars
+                var self   = this,
+                    offset = (self.width - self.offset) * (self.right ? 1 : -1),
+                    apply  = (self.offset && offset) || self.tracking;
+
+                // Styling
+                if (self.backdrop) { self.backdrop.style.opacity = apply ? self.offset / self.width : ''; }
+                if (self.column) { self.column.style.transform = self.column.style.webkitTransform = apply ? 'translateX(' + offset + 'px)' : ''; }
             },
 
             /*********************************************************************/
@@ -591,18 +575,26 @@ is 1280px for the navigation and 640px for the details.
             attached: function () {
 
                 // Vars
-                var self = this;
+                var self   = this,
+                    parent = Polymer.dom(self).parentNode;
 
-                // Mutating
-                self.mutated();
-
-                // Updating
-                self._updateOffset(null, true);
+                // Setting
+                self._setTracker(XP.isElement(parent) ? parent : self.domHost);
 
                 // Listening
-                self.listen(self.parentElement, 'track', '_handleTrack');
+                self.listen(self.tracker, 'track', '_handleTrack');
                 self.listen(window, 'keyup', '_handleHide');
                 self.listen(window, 'resize', '_handleResize');
+
+                // Handling
+                self.async(self._handleShift.bind(self, null, true));
+            },
+
+            // LISTENER
+            created: function () {
+
+                // Classifying
+                this.classList.add('drawer');
             },
 
             // LISTENER
@@ -612,22 +604,19 @@ is 1280px for the navigation and 640px for the details.
                 var self = this;
 
                 // Unlistening
-                self.unlisten(self.parentElement, 'track', '_handleTrack');
+                self.unlisten(self.tracker, 'track', '_handleTrack');
                 self.unlisten(window, 'keyup', '_handleHide');
                 self.unlisten(window, 'resize', '_handleResize');
+
+                // Setting
+                self._setTracker(null);
             },
 
             // LISTENER
             mutated: function () {
 
-                // Vars
-                var self = this;
-
                 // Setting
-                self._setEmpty(!XP.isContent(Polymer.dom(self.$.content), true));
-
-                // Observing
-                XP.onMutation(self, self.mutated.bind(self));
+                this._setEmpty(!XP.hasChildren(Polymer.dom(this.column)));
             },
 
             // LISTENER
@@ -637,7 +626,12 @@ is 1280px for the navigation and 640px for the details.
                 var self = this;
 
                 // Setting
+                self._setBackdrop(Polymer.dom(self.root).querySelector('.backdrop'));
+                self._setColumn(Polymer.dom(self.root).querySelector('.column'));
                 self.breakPoint = self.breakPoint || (self.right ? 640 : 1280);
+
+                // Observing
+                Polymer.dom(self).observeNodes(self.mutated.bind(self));
             },
 
             /*********************************************************************/
@@ -646,14 +640,14 @@ is 1280px for the navigation and 640px for the details.
             _handleHide: function (event) {
 
                 // Hiding
-                if (event.keyCode === 27 || (!event.keyCode && !event.button)) { this.hide(); }
+                if (event.keyCode === 27 || (!event.button && !event.keyCode)) { this.hide(); }
             },
 
             // HANDLER
             _handleResize: function () {
 
-                // Updating
-                this._updateNarrow();
+                // Handling
+                this._breakPointChanged();
             },
 
             // HANDLER
@@ -663,10 +657,36 @@ is 1280px for the navigation and 640px for the details.
                 var self = this;
 
                 // Checking
-                if (self.autoHideDisabled || self.right || !event.detail.isSelected || event.detail.multi) { return; }
+                if (self.autoHideDisabled || self.right || event.detail.multi || !event.detail.isSelected) { return; }
 
                 // Hiding
-                XP.delay(function () { return !event.defaultPrevented && self.hide(); });
+                if (!self.refire(event).defaultPrevented) { self.hide(); }
+            },
+
+            // HANDLER
+            _handleShift: function (offset, instant) {
+
+                // Checking
+                if (!this.column) { return; }
+
+                // Vars
+                var self   = this,
+                    side   = self.right ? 'right' : 'left',
+                    target = self.findTarget() || self.tracker;
+
+                // Setting
+                self._setWidth(XP.isNumber(offset) ? self.width : XP.getBoundings(self.column).width);
+                self._setOffset(XP.isNumber(offset) ? XP.within(offset, 0, self.width) : (self.showed ? self.width : 0));
+
+                // Checking
+                if (!target) { return; }
+
+                // Styling
+                target.style.bottom     = 0;
+                target.style.top        = 0;
+                target.style.position   = 'absolute';
+                target.style.transition = target.style.webkitTransition = instant || self.tracking ? '' : side + ' 0.33s cubic-bezier(0.55, 0, 0.01, 1)';
+                target.style[side]      = self.narrow ? '' : self.offset + 'px';
             },
 
             // HANDLER
@@ -680,31 +700,31 @@ is 1280px for the navigation and 640px for the details.
                     tracked = self.tracked;
 
                 // Tracking
-                if (!tracked && swipe && state === 'start') { tracked = XP.includes(Polymer.dom(event).path, self) ? self : event.currentTarget; }
+                if (!tracked && swipe && state === 'start') { tracked = Polymer.dom(event).path.indexOf(self) >= 0 ? self : event.currentTarget; }
 
                 // Checking
-                if (!tracked || !swipe || (state === 'start' && tracked !== self && (event.detail.x > 48 || self.right))) { return; }
+                if (!tracked || !swipe || (state === 'start' && tracked !== self && (event.detail.x > 48 || !self.narrow || self.right))) { return; }
 
                 // Switching
                 switch (state) {
 
                 // TRACK
                 case 'track':
-                    self._updateOffset(self.offset + event.detail.ddx * (self.right ? -1 : 1));
+                    self._handleShift(self.offset + event.detail.ddx * (self.right ? -1 : 1));
                     break;
 
                 // START
                 case 'start':
                     self._setTracked(tracked);
-                    self._updateWidth();
-                    self._updateOffset(self.offset + event.detail.dx * (self.right ? -1 : 1));
+                    self._setWidth(XP.getBoundings(self.column).width);
+                    self._handleShift(self.offset + event.detail.dx * (self.right ? -1 : 1));
                     break;
 
                 // END
                 case 'end':
                     self._setTracked(null);
                     self.showed = self.offset > self.width / 2;
-                    if (showed === self.showed) { self._updateOffset(); }
+                    if (showed === self.showed) { self._handleShift(); }
                     break;
                 }
             }
