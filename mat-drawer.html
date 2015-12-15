@@ -58,6 +58,7 @@ is 1280px for the navigation and 640px for the details.
 @dependency expandjs ExpandJS/expandjs#0.10.0
 @dependency iron-flex-layout PolymerElements/iron-flex-layout#^1.0.0
 @dependency mat-paper ExpandJS/mat-paper#0.10.0
+@dependency mat-spacing ExpandJS/mat-spacing#0.10.0
 @dependency xp-device ExpandJS/xp-device#0.10.0
 @dependency xp-media-query ExpandJS/xp-media-query#0.10.0
 @dependency xp-refirer-behavior ExpandJS/xp-refirer-behavior#0.10.0
@@ -67,6 +68,7 @@ is 1280px for the navigation and 640px for the details.
 <link rel="import" href="../expandjs/expandjs.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../mat-paper/mat-paper.html">
+<link rel="import" href="../mat-spacing/mat-spacing.html">
 <link rel="import" href="../xp-device/xp-device-behavior.html">
 <link rel="import" href="../xp-media-query/xp-media-query.html">
 <link rel="import" href="../xp-refirer-behavior/xp-refirer-behavior.html">
@@ -130,6 +132,7 @@ is 1280px for the navigation and 640px for the details.
             }
 
             :host .wrapper {
+                box-sizing: border-box;
                 height: 100%;
             }
 
@@ -157,6 +160,7 @@ is 1280px for the navigation and 640px for the details.
             }
 
             :host .column {
+                box-sizing: border-box;
                 height: 100%;
                 overflow-x: hidden;
                 overflow-y: auto;
@@ -164,6 +168,10 @@ is 1280px for the navigation and 640px for the details.
                 position: relative;
                 -webkit-transition: -webkit-transform 0.33s cubic-bezier(0.55, 0, 0.01, 1), visibility 0.33s cubic-bezier(0.55, 0, 0.01, 1);
                 transition: transform 0.33s cubic-bezier(0.55, 0, 0.01, 1), visibility 0.33s cubic-bezier(0.55, 0, 0.01, 1);
+            }
+
+            :host([padding]) .column {
+                @apply(--mat-padding-mobile);
             }
 
             :host([right]) .column {
@@ -202,6 +210,8 @@ is 1280px for the navigation and 640px for the details.
                 background: transparent;
             }
 
+            /* SMARTPHONE */
+
             @media (max-width: 480px) {
 
                 :host(:not([right])) .column {
@@ -217,7 +227,7 @@ is 1280px for the navigation and 640px for the details.
 
         <div class="wrapper" on-xp-select="_handleSelect">
             <div class="spacer"></div>
-            <mat-paper class="column" padding="[[padding]]" z="[[_computeZ(narrow, raised)]]"><content></content></mat-paper>
+            <mat-paper class="column" z="[[_computeZ(narrow, raised)]]"><content></content></mat-paper>
         </div>
 
     </template>
