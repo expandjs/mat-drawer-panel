@@ -239,6 +239,21 @@ is 1280px for the navigation and 640px for the details.
             /*********************************************************************/
 
             /**
+             * Fired on hide.
+             *
+             * @event xp-hide
+             * @param {Element} firer
+             */
+
+            /**
+             * Fired on show.
+             * @event xp-show
+             * @param {Element} firer
+             */
+
+            /*********************************************************************/
+
+            /**
              * Hides the drawer.
              *
              * @method hide
@@ -450,6 +465,7 @@ is 1280px for the navigation and 640px for the details.
                  */
                 showed: {
                     notify: true,
+                    observer: '_showedChanged',
                     reflectToAttribute: true,
                     type: Boolean,
                     value: false
@@ -568,6 +584,13 @@ is 1280px for the navigation and 640px for the details.
                 // Styling
                 if (self.backdrop) { self.backdrop.style.opacity = apply ? self.offset / self.width : ''; }
                 if (self.column) { self.column.style.transform = apply ? 'translateX(' + offset + 'px)' : ''; }
+            },
+
+            // OBSERVER
+            _showedChanged: function () {
+
+                // Firing
+                if (this.isAttached) { this.fire(this.showed ? 'xp-show' : 'xp-hide', {firer: this}); }
             },
 
             /*********************************************************************/
